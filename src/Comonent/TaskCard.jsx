@@ -1,11 +1,14 @@
 import React from 'react'
 import { LuPencilLine } from "react-icons/lu";
 import { MdDeleteOutline } from "react-icons/md";
+import { useTranslation } from "react-i18next";
 
-function TaskCard({item}) {
+function TaskCard({item,setSelectedData,setConditionId,onOpen,editTask,index,DeleteTask,checkedTaskCompleted}) {
+  const { t, i18n } = useTranslation();
+  
   return (
     <>
-           <div className="p-5 rounded-2xl border-2 shadow border-gray-100">
+           <div className="p-5 rounded-2xl border-2 shadow  dark:bg-slate-900 dark:text-white border-gray-100">
               <div className="flex justify-between items-center">
                 <div className="w-full">
                   <label className=" flex gap-2 items-center">
@@ -21,7 +24,7 @@ function TaskCard({item}) {
                       name=""
                     />
                     <span
-                      className={`${item.checkStatus ? "line-through italic text-amber-700" : ""} capitalize text-2xl font-semibold1`}
+                      className={`${item.checkStatus ? "line-through italic text-gray-400" : ""} capitalize text-2xl font-semibold1`}
                     >
                       {item.titleTask}
                     </span>
@@ -33,7 +36,7 @@ function TaskCard({item}) {
                     className="text-2xl text-blue-500 cursor-pointer"
                     onClick={() => {
                       setSelectedData(["task", { id: item.id }]);
-                      editTask("task", { id: item.id });
+                      editTask("task", { id: item.id },{id:index});
                     }}
                   >
                     <LuPencilLine />
@@ -51,7 +54,7 @@ function TaskCard({item}) {
               <div className="ps-6">
                 <span className="text-gray-600 text-sm">{item.date}</span>
                 <p
-                  className={`${item.checkStatus ? "line-through italic text-amber-700" : ""} text-xl`}
+                  className={`${item.checkStatus ? "line-through italic text-gray-400" : ""} text-xl`}
                 >
                   {item.descTask}
                 </p>
@@ -78,7 +81,7 @@ function TaskCard({item}) {
                                 name=""
                               />
                               <span
-                                className={`capitalize text-xl font-semibold ${item.checkStatus || sub.checkStatus ? "line-through italic text-amber-700" : ""}`}
+                                className={`capitalize text-xl font-semibold ${item.checkStatus || sub.checkStatus ? "line-through italic text-gray-400" : ""}`}
                               >
                                 {sub.title}
                               </span>
@@ -94,7 +97,7 @@ function TaskCard({item}) {
                                   editTask("sub", {
                                     id: item.id,
                                     subId: indexSub,
-                                  });
+                                  },{id:index,subId:indexSub});
                                 }}
                               >
                                 <LuPencilLine />
@@ -114,7 +117,7 @@ function TaskCard({item}) {
                             </div>
                           </div>
                           <p
-                            className={`${item.checkStatus || sub.checkStatus ? "line-through italic text-amber-700" : ""} px-6 text-[15px]`}
+                            className={`${item.checkStatus || sub.checkStatus ? "line-through italic text-gray-400" : ""} px-6 text-[15px]`}
                           >
                             {sub.desc}
                           </p>
@@ -124,14 +127,14 @@ function TaskCard({item}) {
                 </div>
               </div>
               <p
-                className="text-blue-600 cursor-pointer hover:text-blue-500 "
+                className="text-blue-500 cursor-pointer hover:text-blue-400 "
                 onClick={() => {
                   setSelectedData(item.id);
                   setConditionId("add");
                   onOpen();
                 }}
               >
-                + Add Subtask
+                + {t("subTaskBtn")}
               </p>
             </div>
     </>

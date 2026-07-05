@@ -1,9 +1,9 @@
 import React from 'react'
-import Home from './pages/Home'
+import LayOut from './LayOut'
 
 function App() {
   return (
-    <Home />
+    <LayOut />
   )
 }
 

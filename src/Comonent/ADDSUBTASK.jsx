@@ -7,6 +7,7 @@ import {
   Button,
   useDisclosure,
 } from "@heroui/react";
+import { useTranslation } from "react-i18next";
 
 export default function ADDSUBTASK({
     index,
@@ -23,6 +24,8 @@ export default function ADDSUBTASK({
   setInputModalDesc,
   inputModalDescMes
 }) {
+  const { t, i18n } = useTranslation();
+
   return (
     <>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} disableAnimation>
@@ -35,7 +38,7 @@ export default function ADDSUBTASK({
               <ModalBody>
                 <input
                   type="text"
-                  placeholder={`${title} Title`}
+                  placeholder={`${t("title")} ${title}`}
                   className="outline-0 border-2 border-gray-100 p-2 py-3 focus:border-3 focus:border-gray-300 rounded-xl"
                   onChange={(e)=>setInputModal(e.target.value)}
                   value={inputModal}
@@ -44,7 +47,7 @@ export default function ADDSUBTASK({
           <p className="text-sm text-red-500 -mt-3 ms-2">{inputModalMessage}</p>
         )}
                 <textarea
-                  placeholder={`${title} Description`}
+                  placeholder={`${t("desc")} ${title}`}
                     onChange={(e) => setInputModalDesc(e.target.value)}
                     value={inputModalDesc}
                   className="outline-0 border-2 border-gray-100 p-2 py-3 focus:border-3 focus:border-gray-300 rounded-xl"
@@ -54,10 +57,10 @@ export default function ADDSUBTASK({
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
-                  Close
+                  {t("close")}
                 </Button>
                 <Button color="primary" onClick={()=>{saveData(index);}}>
-                  Save
+                  {t("save")}
                 </Button>
               </ModalFooter>
             </>

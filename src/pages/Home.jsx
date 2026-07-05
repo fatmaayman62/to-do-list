@@ -1,28 +1,25 @@
-import { Button, Switch, useDisclosure } from "@heroui/react";
+import { Button, Input, Switch, Textarea, useDisclosure } from "@heroui/react";
 import React, { useEffect, useMemo, useState } from "react";
 import ADDSUBTASK from "../Comonent/ADDSUBTASK";
 import toast from "react-hot-toast";
 import useToDoStore from "../Store/useToDoStore";
 import TaskCard from "../Comonent/TaskCard";
-
-
+import { nanoid } from "nanoid";
+import { useTranslation } from "react-i18next";
+import useStoreMode from "../Store/useStoreMode";
+import { MdOutlineLightMode } from "react-icons/md";
+import { PiMoonThin } from "react-icons/pi";
 function Home() {
-  
-const {
-  con,
-  addTaskCon,
-  deleteTaskCon,
-  addSubTaskCon,
-  editTaskCon,
-  toggleChecked,
-} = useToDoStore((state) => ({
-  con: state.tasks,
-  addTaskCon: state.addTask,
-  deleteTaskCon: state.deleteTask,
-  addSubTaskCon: state.addSubTask,
-  editTaskCon: state.editTask,
-  toggleChecked: state.toggleChecked,
-}));
+  const mode = useStoreMode((state) => state.modeWeb);
+  const toggleMode = useStoreMode((state) => state.toggleMode);
+
+  const { t, i18n } = useTranslation();
+  const con = useToDoStore((state) => state.tasks);
+  const addTaskCon = useToDoStore((state) => state.addTask);
+  const deleteTaskCon = useToDoStore((state) => state.deleteTask);
+  const addSubTaskCon = useToDoStore((state) => state.addSubTask);
+  const editTaskCon = useToDoStore((state) => state.editTask);
+  const toggleChecked = useToDoStore((state) => state.toggleChecked);
 
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
@@ -61,21 +58,21 @@ const {
 
   function AddTask() {
     if (inputTitle.trim().length == 0) {
-      setInputTitleMessage("Required");
+      setInputTitleMessage(t("required"));
       return;
     } else {
       setInputTitleMessage("");
     }
     if (inputDesc.trim().length == 0) {
-      setInputDescMess("Required");
+      setInputDescMess(t("required"));
       return;
     } else {
       setInputDescMess("");
     }
-    const date = nanoid();
+    const date = new Date();
     const Day = date.toLocaleTimeString();
     const data = {
-      id: Date.now(),
+      id: nanoid(),
       titleTask: inputTitle,
       date: `${date.getDay()}/${date.getMonth()}/${date.getFullYear()} - ${Day}`,
       descTask: inputDesc,
@@ -85,7 +82,7 @@ const {
     addTaskCon(data);
     setInputTitle("");
     setInputDesc("");
-    toast.success("Added Task Successfully!");
+    toast.success(t("confirmAddTask"));
   }
 
   function clearInputs() {
@@ -98,13 +95,13 @@ const {
 
   function AddSubTask(index) {
     if (inputModal.trim().length == 0) {
-      setInputModalMessage("Required");
+      setInputModalMessage(t("required"));
       return;
     } else {
       setInputModalMessage("");
     }
     if (inputModalDesc.trim().length == 0) {
-      setInputModalDescMess("Required");
+      setInputModalDescMess(t("required"));
       return;
     } else {
       setInputModalDescMess("");
@@ -116,111 +113,155 @@ const {
       checkStatus: false,
     });
     clearInputs();
-    toast.success("Added SubTask Successfully!");
+    toast.success(t("confirmAddSubTask"));
   }
 
   function DeleteTask(type, objIds) {
     deleteTaskCon(type, objIds);
-    toast.error("Deleted Successfully!");
+    toast.error(t("deleteTask"));
   }
-  function editTask(type, objIds) {
+  function editTask(type, objIds, objIds2) {
     if (type === "task") {
-      setInputModal(con[objIds.id].titleTask);
-      setInputModalDesc(con[objIds.id].descTask);
+      setInputModal(con[objIds2.id].titleTask);
+      setInputModalDesc(con[objIds2.id].descTask);
     } else {
-      setInputModal(con[objIds.id].subTask[objIds.subId].title);
-      setInputModalDesc(con[objIds.id].subTask[objIds.subId].desc);
+      setInputModal(con[objIds2.id].subTask[objIds2.subId].title);
+      setInputModalDesc(con[objIds2.id].subTask[objIds2.subId].desc);
     }
 
     setConditionId(type);
     onOpen();
   }
   function saveEdit(arr) {
-    let [type,objIds] = arr;
+    let [type, objIds] = arr;
 
     let data = { title: inputModal, desc: inputModalDesc };
 
     editTaskCon(type, objIds, data);
     clearInputs();
     setConditionId("");
-    toast.success("Updated Successfully!");
+    toast.success(t("updateTask"));
   }
-
+  useEffect(() => {
+    document.documentElement.dir = i18n.language === "ar" ? "rtl" : "ltr";
+  }, [i18n.language]);
   return (
-    <div className="container w-1/2 ">
-      <div className=" rounded-2xl border shadow border-gray-200 flex flex-col gap-4 p-5 mt-4">
-        <h1 className="text-center text-6xl font-bold my-2">TO DO LIST</h1>
-        <input
-          type="text"
+    <div className="container sm:w-2/3 xl:w-1/2 px-4 py-8">
+      {/* Input Section */}
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-xl border border-gray-100 p-8 flex flex-col gap-5">
+        <div className="text-center">
+          <h1 className="text-4xl font-black text-blue-500">
+            {t("titleCard")}
+          </h1>
+          <p className="text-gray-500 mt-2 font-medium">{t("manageTasks")}</p>
+        </div>
+
+        <Input
+          label={t("taskTitle")}
           value={inputTitle}
           onChange={(e) => setInputTitle(e.target.value)}
-          placeholder="Task Title"
-          className="outline-0 border-2 border-gray-100 p-2 py-3 focus:border-3 focus:border-gray-300 rounded-xl"
+          variant="bordered"
+          isInvalid={!!inputTitleMessage}
+          errorMessage={inputTitleMessage}
         />
-        {inputTitleMessage && (
-          <p className="text-sm text-red-500 -mt-3 ms-2">{inputTitleMessage}</p>
-        )}
-        <textarea
-          placeholder="Task Description"
-          onChange={(e) => setInputDesc(e.target.value)}
+        <Textarea
+          label={t("taskDescription")}
           value={inputDesc}
-          className="outline-0 border-2 border-gray-100 p-2 py-3 focus:border-3 focus:border-gray-300 rounded-xl"
-        ></textarea>
-        {inputDescMes && (
-          <p className="text-sm text-red-500 -mt-3 ms-2">{inputDescMes}</p>
-        )}
-        <Button color="primary" className="w-fit" onClick={AddTask}>
-          Add Task
+          onChange={(e) => setInputDesc(e.target.value)}
+          variant="bordered"
+          isInvalid={!!inputDescMes}
+          errorMessage={inputDescMes}
+        />
+        <Button
+          color="primary"
+          size="lg"
+          className="w-full font-bold shadow-lg shadow-blue-500/20"
+          onClick={AddTask}
+        >
+          {t("addTask")}
         </Button>
+
+        <div className="flex justify-end pt-2">
+          <div className="flex items-center gap-4">
+            <Switch
+              isSelected={i18n.language === "ar"}
+              onValueChange={(v) => i18n.changeLanguage(v ? "ar" : "en")}
+            >
+              {i18n.language === "ar" ? "العربية" : "English"}
+            </Switch>
+            <span
+              onClick={() => toggleMode()}
+              className="cursor-pointer text-2xl dark:text-white"
+            >
+              {mode === "light" ? <PiMoonThin /> : <MdOutlineLightMode />}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* ////////////////////////////////////////////////////////////////////////// */}
-      <div className="flex gap-4 my-4">
-        {["All", "UnCompleted", "Completed"].map((item, index) => (
+      {/* Filter Tabs */}
+      <div className="flex justify-center gap-3 my-8">
+        {[t("all"), t("uncompleted"), t("completed")].map((item, index) => (
           <button
             key={item}
-            onClick={() => changeStyle(index + 1)}
-            className={`border border-blue-500 ${cHeck == index + 1 ? "bg-blue-500 text-white" : "bg-white text-blue-500"} p-2 px-4 rounded-xl hover:bg-blue-500 hover:text-white cursor-pointer`}
+            onClick={() => setCHeck(index + 1)}
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+              cHeck === index + 1
+                ? "bg-blue-500 text-white shadow-md"
+                : "bg-white text-blue-500 border border-blue-200 hover:bg-blue-50"
+            }`}
           >
             {item}
           </button>
         ))}
       </div>
-      {/* ///////////////////////////////////////////////////////////////////////////// */}
-      <div className="flex flex-col gap-4 ">
-        {filterData.length !== 0 ? (
-          filterData?.map((item, index) => (
-            <TaskCard item={item} key={item.id} />
+
+      {/* List Section */}
+      <div className="flex flex-col gap-4">
+        {filterData.length > 0 ? (
+          filterData.map((item, index) => (
+            <TaskCard
+              checkedTaskCompleted={checkedTaskCompleted}
+              editTask={editTask}
+              DeleteTask={DeleteTask}
+              index={index}
+              onOpen={onOpen}
+              setConditionId={setConditionId}
+              setSelectedData={setSelectedData}
+              item={item}
+              key={item.id}
+            />
           ))
         ) : (
-          <p className="h-1/2 flex items-center justify-center capitalize font-bold text-2xl">
-            no tasks
-          </p>
-        )}
-
-        {isOpen && (
-          <ADDSUBTASK
-            index={selectedData}
-            saveData={conditionId === "add" ? AddSubTask : saveEdit}
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            title={conditionId === "task" ? "Task" : "SubTask"}
-            header={
-              conditionId === "task"
-                ? "Edit Task"
-                : conditionId === "sub"
-                  ? "Edit SubTask"
-                  : "Add New SubTask"
-            }
-            inputModal={inputModal}
-            setInputModal={setInputModal}
-            inputModalMessage={inputModalMessage}
-            inputModalDesc={inputModalDesc}
-            setInputModalDesc={setInputModalDesc}
-            inputModalDescMes={inputModalDescMes}
-          />
+          <div className="text-center py-16 opacity-60">
+            <h2 className="text-2xl font-bold">{t("noTasks")}</h2>
+            <p className="text-gray-500">{t("startByAdding")}</p>
+          </div>
         )}
       </div>
+
+      {isOpen && (
+        <ADDSUBTASK
+          index={selectedData}
+          saveData={conditionId === "add" ? AddSubTask : saveEdit}
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          title={conditionId === "task" ? t("task") : t("sub")}
+          header={
+            conditionId === "task"
+              ? t("editTask")
+              : conditionId === "sub"
+                ? t("editSubTask")
+                : t("addSubTask")
+          }
+          inputModal={inputModal}
+          setInputModal={setInputModal}
+          inputModalMessage={inputModalMessage}
+          inputModalDesc={inputModalDesc}
+          setInputModalDesc={setInputModalDesc}
+          inputModalDescMes={inputModalDescMes}
+        />
+      )}
     </div>
   );
 }
